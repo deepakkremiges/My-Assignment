@@ -1,10 +1,18 @@
 package com.deepak.assignment.utility;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.deepak.assignment.dto.EmployeeDto;
 import com.deepak.assignment.dto.UpdateEmployeeRequest;
 
 public class UtilGenerator {
@@ -89,5 +97,31 @@ public class UtilGenerator {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static void createExcelFile(List<EmployeeDto> employees, String fileName) throws IOException {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Employees");
+
+        // Create header row
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Employee ID");
+        headerRow.createCell(1).setCellValue("First Name");
+
+        // Create data rows
+        int rowNum = 1;
+        for (EmployeeDto employee : employees) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(employee.getEmpId());
+            row.createCell(1).setCellValue(employee.getFname());
+        }
+
+        // Write the workbook to a file
+        try (FileOutputStream fileOut = new FileOutputStream(fileName)) {
+            workbook.write(fileOut);
+        }
+
+        // Close the workbook
+        workbook.close();
     }
 }

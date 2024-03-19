@@ -10,6 +10,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,6 +32,9 @@ import com.deepak.assignment.utility.JsonRequest;
 import com.deepak.assignment.utility.ResponseHandler;
 import com.deepak.assignment.utility.UtilGenerator;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+
 @RestController
 @RequestMapping("/myhr/employee")
 public class EmployeeController {
@@ -40,6 +44,9 @@ public class EmployeeController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Value("${excel.file.directory}") // Get directory path from property file
+    private String excelFileDirectory;
 
     Logger logger = LoggerFactory.getLogger(EmployeeController.class);
 
@@ -84,25 +91,34 @@ public class EmployeeController {
     }
 
     @GetMapping(path = "/list", produces = { MediaType.APPLICATION_JSON_VALUE,
-            MediaType.APPLICATION_XML_VALUE })
-    public ResponseEntity<Object> listEmployees() {
+            MediaType.APPLICATION_XML_VALUE, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" })
+    public ResponseEntity<Object> listEmployees(@RequestParam(name = "type", required = false) String type) {
         try {
             List<EmployeeDto> employees = employeeService.getAllEmployees();
-            List<List<Object>> employeeList = new ArrayList<>();
 
-            // Map employee details to array of arrays
-            for (EmployeeDto employee : employees) {
-                List<Object> employeeInfo = new ArrayList<>();
-                employeeInfo.add(employee.getEmpId());
-                employeeInfo.add(employee.getFname());
-                employeeList.add(employeeInfo);
+            if ("xlsx".equals(type)) {
+                String fileName = excelFileDirectory + "employees.xlsx";
+                UtilGenerator.createExcelFile(employees, fileName);
+                HttpHeaders headers = new HttpHeaders();
+                headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=employees.xlsx");
+                return new ResponseEntity<>(headers, HttpStatus.OK);
+            } else {
+                List<List<Object>> employeeList = new ArrayList<>();
+
+                // Map employee details to array of arrays
+                for (EmployeeDto employee : employees) {
+                    List<Object> employeeInfo = new ArrayList<>();
+                    employeeInfo.add(employee.getEmpId());
+                    employeeInfo.add(employee.getFname());
+                    employeeList.add(employeeInfo);
+                }
+                String reqId = UtilGenerator.generateUniqueString(12);
+
+                logger.debug("List of Employee Successfuly");
+
+                // Return the array of arrays in the JSON response
+                return ResponseHandler.generateResponse("success", "", "", employeeList, reqId);
             }
-            String reqId = UtilGenerator.generateUniqueString(12);
-
-            logger.debug("List of Employee Successfuly");
-
-            // Return the array of arrays in the JSON response
-            return ResponseHandler.generateResponse("success", "", "", employeeList, reqId);
         } catch (Exception e) {
 
             logger.debug("List of Employee error");
@@ -111,6 +127,8 @@ public class EmployeeController {
                     UtilGenerator.generateUniqueString(12));
         }
     }
+
+    // Above code is related with Excel file
 
     @GetMapping("/lists")
     public List<Employee> getFilteredEmployees(@RequestParam(required = false) String filter) {

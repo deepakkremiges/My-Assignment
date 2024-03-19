@@ -64,6 +64,10 @@ public class Employee {
     @Column(name = "client_reqid", nullable = false)
     private String clientReqId;
 
+    // public Integer getContribution() {
+    // return contribution;
+    // }
+
     // private int contribution;
 
     // Getters and setters omitted for brevity

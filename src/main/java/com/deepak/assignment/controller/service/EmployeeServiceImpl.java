@@ -2,9 +2,11 @@ package com.deepak.assignment.controller.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private EmployeeShadowRepostory employeeShadowRepostory;
+
+    @Autowired
+    private RedisTemplate<String, Integer> redisTemplate;
 
     public void addEmployee(EmployeeDto employeeDto) {
 
@@ -156,35 +161,35 @@ public class EmployeeServiceImpl implements EmployeeService {
         return null;
     }
 
-    // Get data in xml format
-    /*
-     * @Override
-     * public String getAllEmployeesAsXml() {
-     * try {
-     * List<Employee> employees = employeeRepository.findAll();
-     * 
-     * // Create a JAXB context for the Employee class
-     * JAXBContext jaxbContext = JAXBContext.newInstance(ListWrapper.class);
-     * 
-     * // Create a marshaller
-     * Marshaller marshaller = jaxbContext.createMarshaller();
-     * marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-     * 
-     * // Wrap the list of employees to include a root element
-     * ListWrapper<Employee> listWrapper = new ListWrapper<>(employees);
-     * 
-     * // Marshal the wrapped list to XML
-     * StringWriter writer = new StringWriter();
-     * marshaller.marshal(listWrapper, writer);
-     * 
-     * // Return the XML string
-     * return writer.toString();
-     * } catch (JAXBException e) {
-     * // Handle JAXB exception
-     * e.printStackTrace(); // Consider logging the error instead
-     * return null;
-     * }
-     * }
-     */
+    // Problem 23.
+
+    public int getEmployeeContribution(String department, String employeeId) {
+        String key = "user." + department + "." + employeeId;
+        Integer contribution = redisTemplate.opsForValue().get(key);
+        if (contribution == null) {
+            contribution = fetchEmployeeContributionFromDatabase(department, employeeId);
+            cacheEmployeeContributionInRedis(department, employeeId, contribution);
+        }
+        return contribution;
+    }
+
+    private int fetchEmployeeContributionFromDatabase(String department, String employeeId) {
+        // Perform database operation to fetch contribution
+        // For example:
+        // Employee employee = employeeRepository.findByDepartmentAndEmpId(department,
+        // employeeId);
+        // return employee.getContribution();
+        // For demonstration, returning a dummy value
+        return 7;
+    }
+
+    private void cacheEmployeeContributionInRedis(String department, String employeeId, int contribution) {
+        String key = "user." + department + "." + employeeId;
+        redisTemplate.opsForValue().set(key, contribution);
+        // Set TTL for the key
+        redisTemplate.expire(key, 3, TimeUnit.MINUTES);
+    }
+
+    // Problem 23 Ends Here.
 
 }

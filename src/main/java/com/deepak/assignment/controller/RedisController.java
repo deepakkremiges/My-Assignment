@@ -1,7 +1,10 @@
 package com.deepak.assignment.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.deepak.assignment.controller.service.EmployeeService;
 import com.deepak.assignment.controller.service.RedisService;
 import com.deepak.assignment.utility.JsonRequest;
 import com.deepak.assignment.utility.ResponseHandler;
@@ -13,6 +16,9 @@ import java.util.Map;
 public class RedisController {
 
     private final RedisService redisService;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     // @Autowired
     public RedisController(RedisService redisService) {
@@ -90,9 +96,7 @@ public class RedisController {
 
             // Call service method to get the latest count for the employee
             int latestCount = redisService.getEmployeeContribution(department);
-            // Return the response
-            // return ResponseEntity.ok().body("Latest count for department " + department +
-            // ": " + latestCount);
+
             return ResponseHandler.generateResponse("success", "", "", latestCount,
                     UtilGenerator.generateUniqueString(12));
         } catch (Exception e) {
@@ -102,18 +106,22 @@ public class RedisController {
 
     }
 
-    /*
-     * 
-     * // Problem 23.
-     * 
-     * @GetMapping("/myhr/employee/getContribution/redisdb")
-     * public ResponseEntity<Object> getContribution(@RequestParam String
-     * department) {
-     * int totalContribution =
-     * redisService.getTotalContributionByDepartment(department);
-     * return ResponseHandler.generateResponse("success", "", "", totalContribution,
-     * UtilGenerator.generateUniqueString(12));
-     * }
-     */
+    // Problem 23.
+
+    @GetMapping("/{department}/{employeeId}/contribution")
+    public ResponseEntity<Object> getEmployeeContribution(@PathVariable String department,
+            @PathVariable String employeeId) {
+
+        try {
+
+            int contribution = employeeService.getEmployeeContribution(department, employeeId);
+
+            return ResponseHandler.generateResponse("success", "", "", contribution,
+                    UtilGenerator.generateUniqueString(12));
+        } catch (Exception e) {
+            return ResponseHandler.generateResponse("error", "500", e.getMessage(), null,
+                    UtilGenerator.generateUniqueString(12));
+        }
+    }
 
 }

@@ -23,5 +23,5 @@ public interface EmployeeService {
 
     ResponseEntity<Object> deleteEmployee(Long id);
 
-    // String getAllEmployeesAsXml();
+    public int getEmployeeContribution(String department, String employeeId);
 }

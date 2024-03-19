@@ -1,15 +1,10 @@
 package com.deepak.assignment.controller.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.deepak.assignment.entity.Employee;
-import com.deepak.assignment.repository.EmployeeRepository;
-
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -110,35 +105,4 @@ public class RedisService {
         return totalContribution;
     }
 
-    /*
-     * // Problem 23.
-     * public int getTotalContributionByDepartment(String department) {
-     * List<String> empIds =
-     * employeeRepository.findEmployeeIdsByDepartment(department);
-     * int totalContribution = 0;
-     * for (String empId : empIds) {
-     * String redisKey = "user." + department + "." + empId;
-     * Integer contribution = redisTemplate.opsForValue().get(redisKey);
-     * if (contribution != null) {
-     * totalContribution += contribution;
-     * } else {
-     * int empContribution = fetchEmployeeContributionFromDB(department, empId);
-     * totalContribution += empContribution;
-     * redisTemplate.opsForValue().set(redisKey, empContribution, redisCacheTtl,
-     * TimeUnit.MINUTES);
-     * }
-     * }
-     * return totalContribution;
-     * }
-     * 
-     * private int fetchEmployeeContributionFromDB(String department, String empId)
-     * {
-     * // Perform database operation to fetch employee contribution
-     * // Assuming you have a method in EmployeeRepository to fetch contribution by
-     * // department and employeeId
-     * return employeeRepository.findContributionByDepartmentAndEmpId(department,
-     * empId);
-     * }
-     * 
-     */
 }
