@@ -4,5 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SharedResource {
-    public List<String> lines = new ArrayList<>();
+    // Assuming lines is the only shared resource between threads
+    public final List<String> lines = new ArrayList<>();
 }

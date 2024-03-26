@@ -13,14 +13,31 @@ public class MultiThreadApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MultiThreadApplication.class, args);
 
-		SharedResource sharedResource = new SharedResource();
-		ReaderThread readerThread = new ReaderThread(
-				"/home/deepakk/Desktop/Assignment_Remiges/multithread/multi_thread/src/main/java/com/deepak/multi_thread/thread/input.txt",
-				sharedResource);
-		CounterThread counterThread = new CounterThread(sharedResource);
+		// Added by Deepak for Thread part
 
+		SharedResource sharedResource = new SharedResource();
+
+		// Create and start the reader thread
+		Thread readerThread = new Thread(new ReaderThread(
+				"/home/deepakk/Desktop/Assignment_Remiges/multithread/multi_thread/src/main/java/com/deepak/multi_thread/thread/input.txt",
+				sharedResource.lines));
 		readerThread.start();
-		counterThread.start();
+
+		// Create and start the counter thread
+		int numberOfCounterThreads = 2; // You can adjust this based on your requirements
+		for (int i = 0; i < numberOfCounterThreads; i++) {
+			Thread counterThread = new Thread(new CounterThread(sharedResource.lines));
+			counterThread.start();
+		}
+
+		// Wait for reader thread to finish
+		try {
+			readerThread.join();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+
+		// Thread part over
 	}
 
 }
