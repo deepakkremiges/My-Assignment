@@ -24,6 +24,9 @@ public class TextProcessor {
                 logger.info("Reading line from the text file");
             }
         } catch (IOException e) {
+
+            logger.info("Filename not found");
+
             e.printStackTrace();
         }
     }
